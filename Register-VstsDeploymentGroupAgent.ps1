@@ -35,7 +35,7 @@ if (Test-Path (Join-Path -Path "$AgentFolder" -ChildPath ".\.agent"))
 }
 else
 {
-    .\config.cmd --unattended --deploymentgroup --deploymentgroupname $DeploymentGroupName --agent $AgentName --runasservice --work '_work' --url "https://$VstsAccountName.visualstudio.com/" --projectname $VstsTeamProjectName --auth PAT --token $VstsPat --runAsService --windowsLogonAccount "NT AUTHORITY\SYSTEM" 
+    .\config.cmd --unattended --deploymentgroup --deploymentgroupname $DeploymentGroupName --agent $AgentName --runasservice --work '_work' --url "https://$VstsAccountName.visualstudio.com/" --projectname $VstsTeamProjectName --auth PAT --token $VstsPat --runAsService --windowsLogonAccount "NT AUTHORITY\SYSTEM" --replace 
 }
 
 if ($agentZip)
