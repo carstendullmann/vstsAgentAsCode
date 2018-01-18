@@ -1,0 +1,10 @@
+# See https://docs.microsoft.com/en-us/powershell/dsc/authoringresourcemof
+[ClassVersion("0.1.0"), FriendlyName("cVstsAgent")]
+class Demo_IISWebsite : OMI_BaseResource
+{
+  [write,ValueMap{"Present", "Absent"},Values{"Present", "Absent"}] string Ensure;
+  [Key] string Name;
+  [Required] string AgentFolder;
+  [Required] string ServerUrl;
+  [write] string Token;
+};
