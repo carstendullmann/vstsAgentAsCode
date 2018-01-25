@@ -1,4 +1,4 @@
-# TODO: Make thes pester tests 
+# TODO: Make these pester tests 
 
 # This file requires a file cVstsAgent.tests.settings.psd1 in the same directory, containing settings like so:
 
@@ -31,7 +31,7 @@ Remove-Agent -ServerUrl $testSettings.ServerUrl `
     -Token $testSettings.PAT `
     -AgentFolder $testSettings.AgentFolder
 
-Set-Agent -Replace $true -ServerUrl $testSettings.ServerUrl `
+Set-Agent -ServerUrl $testSettings.ServerUrl `
     -Token $testSettings.PAT `
     -AgentFolder $testSettings.AgentFolder `
     -PoolName $testSettings.PoolName `

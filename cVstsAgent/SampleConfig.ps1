@@ -9,8 +9,8 @@ Configuration SampleConfig
     
     cVstsAgent MyAgent
     {
-        Name = "MyMachine-Agent1"
-        AgentFolder = "C:\vsts-agent\5"
+        Name = "TestAgent10"
+        AgentFolder = "C:\vsts-agent\9"
         Token = $Token
         ServerUrl = "https://cadull.visualstudio.com/"
         PoolName = "default"

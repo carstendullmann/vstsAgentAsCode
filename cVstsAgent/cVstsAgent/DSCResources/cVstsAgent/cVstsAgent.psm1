@@ -31,19 +31,14 @@ function Get-TargetResource
     $existingConfig = Get-ExistingConfig -AgentFolder $AgentFolder -Token $Token
     if ($existingConfig.Agent) 
     {
-        $serviceName = ""
-        if ($existingConfig.Service) 
-        {
-            $serviceName = $existingConfig.Service
-        }
-
+        $existingPoolName = if ($existingConfig.PoolFromServer) { $existingConfig.PoolFromServer.Name } else { "[PoolId:$($existingConfig.Agent.poolId)]" }
         return @{
             Ensure      = "Present"
             Name        = $existingConfig.Agent.agentName 
             AgentFolder = $AgentFolder
             ServerUrl   = $existingConfig.Agent.serverUrl
-            Token       = ""
-            PoolName    = ""
+            Token       = "**********************"
+            PoolName    = $existingPoolName
         }
     }
     
@@ -86,40 +81,29 @@ function Set-TargetResource
 
     if ($Ensure -eq "Present" -and $existingConfig.Agent) 
     {
-        $needsReconfigure = $false
-        # Agent exists. Check whether all settings are correct, otherwise reconfigure.
-        if ($existingConfig.Agent.agentName -ne $Name) 
-        {
-            throw "Trying to change the name from $($existingConfig.Agent.agentName) to $Name for agent in folder $AgentFolder. Changing names or agent folders is currently not supported."
-        }
-
-        if ($existingConfig.Agent.serverUrl -ne $ServerUrl) 
-        {
-            # This is effectively moving the agent to another server
-            $needsReconfigure = $true
-        }
-
-        # Currently the only thing we can reconfigure is the ServerUrl
-        
+        Write-Verbose "Agent is present as requested. Reconfiguring it now."
+        Remove-Agent -ServerUrl $ServerUrl -Token $Token -AgentFolder $AgentFolder
+        Set-Agent -ServerUrl $ServerUrl -Token $Token -AgentFolder $AgentFolder -PoolName $PoolName -AgentName $Name
         return
     }
 
     if ($Ensure -eq "Present" -and -not $existingConfig.Agent) 
     {
-        # Agent not there yet. Configure it.
-        
+        Write-Verbose "Agent was requested to be present, but is not. Configuring it now."
+        Set-Agent -ServerUrl $ServerUrl -Token $Token -AgentFolder $AgentFolder -PoolName $PoolName -AgentName $Name
         return
     }
 
     if ($Ensure -eq "Absent" -and $existingConfig.Agent) 
     {
-        # Agent exists. Unconfigure it and delete the agent folder.
+        Write-Verbose "Agent was requested to be absent, but is present. Removing it now."
+        Remove-Agent -ServerUrl $ServerUrl -Token $Token -AgentFolder $AgentFolder
         return
     }
 
     if ($Ensure -eq "Absent" -and -not $existingConfig.Agent) 
     {
-        # Agent exists. Unconfigure it and delete the agent folder.
+        Write-Verbose "Agent is absent as requested. Doing nothing."
         return
     }
 
@@ -151,13 +135,74 @@ function Test-TargetResource
         [string]$PoolName
     )
 
-    #Write-Verbose "Use this cmdlet to deliver information about command processing."
+    $existingConfig = Get-ExistingConfig -AgentFolder $AgentFolder -Token $Token 
+    $existingPoolName = if ($existingConfig.PoolFromServer) { $existingConfig.PoolFromServer.Name } else { "" }
+    
+    if ($Ensure -eq "Absent" -and $existingConfig.Agent) 
+    {
+        Write-Verbose "Agent was requested to be absent but is present."
+        return $false
+    }
 
-    #Write-Debug "Use this cmdlet to write debug information while troubleshooting."
+    if ($Ensure -eq "Absent" -and -not $existingConfig.Agent) 
+    {
+        Write-Verbose "Agent is absent as requested."
+        return $true
+    }
 
+    if ($Ensure -eq "Present" -and -not $existingConfig.Agent) 
+    {
+        Write-Verbose "Agent was requested to be present but is absent."
+        return $false
+    }
 
-    #Include logic to 
-    $result = [System.Boolean]
-    #Add logic to test whether the website is present and its status mathes the supplied parameter values. If it does, return true. If it does not, return false.
-    $result
+    if ($Ensure -eq "Present" -and $existingConfig.Agent) 
+    {
+        Write-Verbose "Agent is present as requested."
+        if ($Name -ne $existingConfig.Agent.agentName)
+        {
+            Write-Verbose "Agent name does not match."
+            return $false
+        }
+        
+        if ($PoolName -ne $existingPoolName)
+        {
+            Write-Verbose "PoolName does not match."
+            return $false
+        }
+        
+        if ($ServerUrl -ne $existingConfig.Agent.serverUrl)
+        {
+            Write-Verbose "ServerUrl does not match."
+            return $false
+        }
+
+        if ($existingConfig.AgentFromServer)
+        {
+            if ($existingConfig.AgentFromServer.name -ne $Name)
+            {
+                Write-Verbose "AgentName on server ($($existingConfig.AgentFromServer.name)) does not match requested name $Name."
+                throw "Changing AgentName is currently not supported."
+                return $false
+            }
+
+            if ($existingConfig.AgentFromServer.SystemCapabilities)
+            {
+                if ($existingConfig.AgentFromServer.SystemCapabilities."Agent.HomeDirectory")
+                {
+                    $AgentFolderOnServer = $existingConfig.AgentFromServer.SystemCapabilities."Agent.HomeDirectory"
+                    if ($AgentFolderOnServer -ne $AgentFolder)
+                    {
+                        Write-Verbose "AgentFolder on server ($AgentFolderOnServer) does not match requested folder $AgentFolder."
+                        throw "Changing AgentFolder is currently not supported."
+                        return $false
+                    }
+                }
+            }
+        }
+        
+        return $true
+    }
+
+    throw "Ensure = '$Ensure'. Sure?"
 }

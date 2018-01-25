@@ -63,7 +63,7 @@ function Get-ExistingConfig($AgentFolder, $Token)
     return $existingConfig
 }
 
-function Set-Agent([System.Boolean] $Replace, $ServerUrl, $Token, $AgentFolder, $PoolName, $AgentName)
+function Set-Agent($ServerUrl, $Token, $AgentFolder, $PoolName, $AgentName)
 {
     # Replace: If we have same name but it is not our directory
     # Reconfigure: If we have any different (new) setting for existing agent
@@ -90,18 +90,11 @@ function Set-Agent([System.Boolean] $Replace, $ServerUrl, $Token, $AgentFolder, 
         "--token", $Token,
         "--pool", $PoolName,
         "--agent", $AgentName, 
-        "--runAsService"
+        "--runAsService",
+        "--replace"
         # TODO: "--windowsLogonAccount myDomain\myUserName --windowsLogonPassword myPassword"
     )
 
-    $CommandArgs
-
-    if ($Replace)
-    {
-        Write-Verbose "Replacing existing agent."
-        $CommandArgs += "--replace"
-    }
-  
     & "$AgentFolder\config.cmd" $CommandArgs
 
     # TODO: Check $LASTEXITCODE
