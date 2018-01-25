@@ -23,7 +23,8 @@ function Get-TargetResource {
         [ValidateNotNullOrEmpty()]
         [string]$ServerUrl,
 
-        [string]$Token
+        [string]$Token,
+        [string]$PoolName
     )
 
     $existingConfig = Get-ExistingConfig -AgentFolder $AgentFolder -Token $Token
@@ -79,7 +80,8 @@ function Set-TargetResource {
         [ValidateNotNullOrEmpty()]
         [string]$ServerUrl,
 
-        [string]$Token
+        [string]$Token,
+        [string]$PoolName
     )
 
     $existingConfig = Get-ExistingConfig -AgentFolder $AgentFolder -Token $Token
@@ -146,7 +148,8 @@ function Test-TargetResource {
         [ValidateNotNullOrEmpty()]
         [string]$ServerUrl,
 
-        [string]$Token
+        [string]$Token,
+        [string]$PoolName
     )
 
     #Write-Verbose "Use this cmdlet to deliver information about command processing."

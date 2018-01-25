@@ -5,8 +5,9 @@ Configuration SampleConfig
         $Token
     )
 
-    Import-DscResource cVstsAgent
-    VstsAgent MyAgent
+    Import-DscResource -ModuleName cVstsAgent
+    
+    cVstsAgent MyAgent
     {
         Name = "MyMachine-Agent1"
         AgentFolder = "C:\vsts-agent\5"

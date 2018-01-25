@@ -1,0 +1,2 @@
+Copy-Item -Path $PSScriptRoot\Output\cVstsAgent -Destination "C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules\" -Recurse -Force
+#Copy-Item -Path $PSScriptRoot\Output\cVstsAgent -Destination "C:\Program Files\WindowsPowerShell\Modules" -Recurse -Force

@@ -7,7 +7,7 @@
     # RootModule = ''
     
     # Version number of this module.
-    ModuleVersion = '0.1'
+    ModuleVersion = '0.1.0.0'
     
     # ID used to uniquely identify this module
     GUID = '9B6E6A61-449F-4876-B2BA-C569387651B9'
@@ -31,10 +31,10 @@
     CLRVersion = '4.0'
     
     # Modules that must be imported into the global environment prior to importing this module
-    RequiredModules = @()
+    # RequiredModules = @()
     
     # Modules to import as nested modules of the module specified in RootModule/ModuleToProcess
-    NestedModules = @("cVstsAgent.psm1")
+    # NestedModules = @("cVstsAgent.psm1")
     
     # Functions to export from this module
     FunctionsToExport = @("Get-TargetResource", "Set-TargetResource", "Test-TargetResource")
