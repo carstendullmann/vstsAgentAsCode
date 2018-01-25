@@ -1,6 +1,9 @@
 # See https://docs.microsoft.com/en-us/powershell/dsc/authoringresourcemof
 # https://docs.microsoft.com/en-us/powershell/dsc/resourceauthoringchecklist
 
+# Dotsourcing our implementation (helper methods)
+. $PSScriptRoot\cVstsAgent.Implementation.ps1
+
 # DSC uses the Get-TargetResource function to fetch the status of the resource instance specified in the parameters for the target machine
 function Get-TargetResource {
     param
@@ -23,21 +26,37 @@ function Get-TargetResource {
         [string]$Token
     )
 
-    $getTargetResourceResult = $null
+    $existingConfig = Get-ExistingConfig -AgentFolder $AgentFolder -Token $Token
+    if ($existingConfig.Agent) 
+    {
+        $serviceName = ""
+        if ($existingConfig.Service) 
+        {
+            $serviceName = $existingConfig.Service
+        }
 
-    <# Insert logic that uses the mandatory parameter values to get the website and assign it to a variable called $Website #>
-    <# Set $ensureResult to "Present" if the requested website exists and to "Absent" otherwise #>
-
-
-
-    $getTargetResourceResult = @{
-        Ensure      = $ensureResult
+        return @{
+            Ensure      = "Present"
+            AgentFolder = $AgentFolder
+            Name        = $existingConfig.Agent.agentName 
+            ServerUrl   = $existingConfig.Agent.serverUrl
+            AgentId     = $existingConfig.Agent.agentId
+            PoolId      = $existingConfig.Agent.poolId
+            WorkFolder  = $existingConfig.Agent.workFolder
+            ServiceName = $serviceName
+        }
+    }
+    
+    return @{
+        Ensure      = "Absent"
         Name        = ""
         AgentFolder = ""
         ServerUrl   = ""
+        AgentId     = ""
+        PoolId      = ""
+        WorkFolder  = ""
+        ServiceName = ""
     }
-
-    return $getTargetResourceResult
 }
 
 # The Set-TargetResource function is used to create, delete or configure a website on the target machine. 
@@ -63,10 +82,48 @@ function Set-TargetResource {
         [string]$Token
     )
 
-    <# If Ensure is set to "Present" and the website specified in the mandatory input parameters does not exist, then create it using the specified parameter values #>
-    <# Else, if Ensure is set to "Present" and the website does exist, then update its properties to match the values provided in the non-mandatory parameter values #>
-    <# Else, if Ensure is set to "Absent" and the website does not exist, then do nothing #>
-    <# Else, if Ensure is set to "Absent" and the website does exist, then delete the website #>
+    $existingConfig = Get-ExistingConfig -AgentFolder $AgentFolder -Token $Token
+
+    if ($Ensure -eq "Present" -and $existingConfig.Agent) 
+    {
+        $needsReconfigure = $false
+        # Agent exists. Check whether all settings are correct, otherwise reconfigure.
+        if ($existingConfig.Agent.agentName -ne $Name) 
+        {
+            throw "Trying to change the name from $($existingConfig.Agent.agentName) to $Name for agent in folder $AgentFolder. Changing names or agent folders is currently not supported."
+        }
+
+        if ($existingConfig.Agent.serverUrl -ne $ServerUrl) 
+        {
+            # This is effectively moving the agent to another server
+            $needsReconfigure = $true
+        }
+
+        # Currently the only thing we can reconfigure is the ServerUrl
+        
+        return
+    }
+
+    if ($Ensure -eq "Present" -and -not $existingConfig.Agent) 
+    {
+        # Agent not there yet. Configure it.
+        
+        return
+    }
+
+    if ($Ensure -eq "Absent" -and $existingConfig.Agent) 
+    {
+        # Agent exists. Unconfigure it and delete the agent folder.
+        return
+    }
+
+    if ($Ensure -eq "Absent" -and -not $existingConfig.Agent) 
+    {
+        # Agent exists. Unconfigure it and delete the agent folder.
+        return
+    }
+
+    throw "Ensure = '$Ensure'. Sure?"
 }
 
 function Test-TargetResource {

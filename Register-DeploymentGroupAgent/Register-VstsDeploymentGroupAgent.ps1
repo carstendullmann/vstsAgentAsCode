@@ -7,13 +7,13 @@ param
     [Parameter(Mandatory)][String] $VstsTeamProjectName,
     [Parameter(Mandatory)][String] $VstsPat
 )
-$ErrorActionPreference="Stop"
-If(-NOT 
+$ErrorActionPreference = "Stop"
+If (-NOT 
     ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent() ).IsInRole( [Security.Principal.WindowsBuiltInRole] "Administrator"))
 { 
     throw "Administrator Privileges needed."
 }
-If(-NOT (Test-Path $AgentFolder))
+If (-NOT (Test-Path $AgentFolder))
 {
     New-Item -Path $AgentFolder -ItemType Directory
 }
@@ -22,7 +22,7 @@ Set-Location $AgentFolder
 $agentZip = $null
 if (-NOT (Test-Path (Join-Path -Path "$AgentFolder" -ChildPath "config.cmd"))) # did we do the agent download already?
 {
-    $agentZip="$PWD\agent.zip"
+    $agentZip = "$PWD\agent.zip"
     Invoke-WebRequest -Uri "https://vstsagentpackage.azureedge.net/agent/2.126.0/vsts-agent-win-x64-2.126.0.zip" -OutFile $agentZip
     Add-Type -AssemblyName System.IO.Compression.FileSystem
     [System.IO.Compression.ZipFile]::ExtractToDirectory( $agentZip, "$PWD")
