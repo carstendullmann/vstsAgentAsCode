@@ -5,7 +5,8 @@
 . $PSScriptRoot\cVstsAgent.Implementation.ps1
 
 # DSC uses the Get-TargetResource function to fetch the status of the resource instance specified in the parameters for the target machine
-function Get-TargetResource {
+function Get-TargetResource
+{
     param
     (
         [ValidateSet("Present", "Absent")]
@@ -38,13 +39,11 @@ function Get-TargetResource {
 
         return @{
             Ensure      = "Present"
-            AgentFolder = $AgentFolder
             Name        = $existingConfig.Agent.agentName 
+            AgentFolder = $AgentFolder
             ServerUrl   = $existingConfig.Agent.serverUrl
-            AgentId     = $existingConfig.Agent.agentId
-            PoolId      = $existingConfig.Agent.poolId
-            WorkFolder  = $existingConfig.Agent.workFolder
-            ServiceName = $serviceName
+            Token       = ""
+            PoolName    = ""
         }
     }
     
@@ -53,15 +52,14 @@ function Get-TargetResource {
         Name        = ""
         AgentFolder = ""
         ServerUrl   = ""
-        AgentId     = ""
-        PoolId      = ""
-        WorkFolder  = ""
-        ServiceName = ""
+        Token       = ""
+        PoolName    = ""
     }
 }
 
 # The Set-TargetResource function is used to create, delete or configure a website on the target machine. 
-function Set-TargetResource {
+function Set-TargetResource
+{
     [CmdletBinding(SupportsShouldProcess = $true)]
     param
     (
@@ -128,7 +126,8 @@ function Set-TargetResource {
     throw "Ensure = '$Ensure'. Sure?"
 }
 
-function Test-TargetResource {
+function Test-TargetResource
+{
     [CmdletBinding()]
     [OutputType([System.Boolean])]
     param
