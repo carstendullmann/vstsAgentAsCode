@@ -76,7 +76,7 @@ function Get-ExistingConfig($AgentFolder, $Token)
     return $existingConfig
 }
 
-function Set-Agent($ServerUrl, $Token, $AgentFolder, $PoolName, $AgentName, $ServiceCredentials, $LocalAgentSource)
+function Set-Agent($ServerUrl, $Token, $AgentFolder, $PoolName, $AgentName, $ServiceCredentials, $LocalAgentSource, $WorkFolder)
 {
     # Replace: If we have same name but it is not our directory
     # Reconfigure: If we have any different (new) setting for existing agent
@@ -113,9 +113,12 @@ function Set-Agent($ServerUrl, $Token, $AgentFolder, $PoolName, $AgentName, $Ser
         "--token", $Token,
         "--pool", $PoolName,
         "--agent", $AgentName, 
+        "--work", $WorkFolder,
         "--runAsService",
         "--replace"
     )
+
+    Write-Verbose $WorkFolder
 
     if ($ServiceCredentials)
     {

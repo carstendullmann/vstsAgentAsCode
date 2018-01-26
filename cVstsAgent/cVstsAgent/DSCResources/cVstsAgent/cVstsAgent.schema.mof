@@ -9,4 +9,5 @@ class cVstsAgent : OMI_BaseResource
   [write, EmbeddedInstance("MSFT_Credential")] string ServiceCredentials;
   [write] string PoolName;
   [write] string LocalAgentSource;
+  [write] string WorkFolder;
 };

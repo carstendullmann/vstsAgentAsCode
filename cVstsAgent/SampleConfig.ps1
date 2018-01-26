@@ -21,6 +21,7 @@ Configuration SampleConfig
             ServerUrl          = "https://cadull.visualstudio.com/"
             PoolName           = "default"
             Ensure             = "Present"
+            WorkFolder         = "C:\vsts-agent\workFolder13"
             # ServiceCredentials = $ServiceCreds
             LocalAgentSource   = "C:\vsts-agent\agentSource\agent.zip"
         }

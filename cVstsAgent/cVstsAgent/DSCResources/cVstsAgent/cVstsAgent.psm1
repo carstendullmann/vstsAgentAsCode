@@ -27,7 +27,8 @@ function Get-TargetResource
         [PSCredential] $Token,
         [PSCredential] $ServiceCredentials = $null,
         [String] $PoolName = "default",
-        [String] $LocalAgentSource = $null
+        [String] $LocalAgentSource = $null,
+        [String] $WorkFolder = "_work"
     )
 
     $PlainToken = $Token.GetNetworkCredential().Password
@@ -83,7 +84,8 @@ function Set-TargetResource
         [PSCredential] $Token,
         [PSCredential] $ServiceCredentials = $null,
         [String] $PoolName = "default",
-        [String] $LocalAgentSource = $null
+        [String] $LocalAgentSource = $null,
+        [String] $WorkFolder = "_work"
     )
 
     $PlainToken = $Token.GetNetworkCredential().Password
@@ -93,14 +95,14 @@ function Set-TargetResource
     {
         Write-Verbose "Agent is present as requested. Reconfiguring it now."
         Remove-Agent -ServerUrl $ServerUrl -Token $PlainToken -AgentFolder $AgentFolder
-        Set-Agent -ServerUrl $ServerUrl -Token $PlainToken -AgentFolder $AgentFolder -PoolName $PoolName -AgentName $Name -ServiceCredentials $ServiceCredentials -LocalAgentSource $LocalAgentSource
+        Set-Agent -ServerUrl $ServerUrl -Token $PlainToken -AgentFolder $AgentFolder -PoolName $PoolName -AgentName $Name -ServiceCredentials $ServiceCredentials -LocalAgentSource $LocalAgentSource -WorkFolder $WorkFolder
         return
     }
 
     if ($Ensure -eq "Present" -and -not $existingConfig.Agent) 
     {
-        Write-Verbose "Agent was requested to be present, but is not. Configuring it now."
-        Set-Agent -ServerUrl $ServerUrl -Token $PlainToken -AgentFolder $AgentFolder -PoolName $PoolName -AgentName $Name -ServiceCredentials $ServiceCredentials -LocalAgentSource $LocalAgentSource
+        Write-Verbose "Agent was requested to be present, but is absent. Configuring it now."
+        Set-Agent -ServerUrl $ServerUrl -Token $PlainToken -AgentFolder $AgentFolder -PoolName $PoolName -AgentName $Name -ServiceCredentials $ServiceCredentials -LocalAgentSource $LocalAgentSource -WorkFolder $WorkFolder
         return
     }
 
@@ -144,7 +146,8 @@ function Test-TargetResource
         [PSCredential] $Token,
         [PSCredential] $ServiceCredentials = $null,
         [String] $PoolName = "default",
-        [String] $LocalAgentSource = $null
+        [String] $LocalAgentSource = $null,
+        [String] $WorkFolder = "_work"
     )
 
     $PlainToken = $Token.GetNetworkCredential().Password
@@ -176,6 +179,12 @@ function Test-TargetResource
         if ($Name -ne $existingConfig.Agent.agentName)
         {
             Write-Verbose "Agent name does not match."
+            return $false
+        }
+        
+        if ($WorkFolder -ne $existingConfig.Agent.workFolder)
+        {
+            Write-Verbose "Agent work folder does not match."
             return $false
         }
         
