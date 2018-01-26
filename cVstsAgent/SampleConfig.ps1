@@ -15,13 +15,14 @@ Configuration SampleConfig
 
         cVstsAgent MyAgent
         {
-            Name               = "TestAgent12"
-            AgentFolder        = "C:\vsts-agent\9"
+            Name               = "TestAgent13"
+            AgentFolder        = "C:\vsts-agent\13"
             Token              = $Token
             ServerUrl          = "https://cadull.visualstudio.com/"
             PoolName           = "default"
             Ensure             = "Present"
-            ServiceCredentials = $ServiceCreds
+            # ServiceCredentials = $ServiceCreds
+            LocalAgentSource   = "C:\vsts-agent\agentSource\agent.zip"
         }
 
         cVstsAgent MyAgent5

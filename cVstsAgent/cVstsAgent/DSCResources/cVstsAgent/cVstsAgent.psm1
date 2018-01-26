@@ -25,8 +25,9 @@ function Get-TargetResource
         [string]$ServerUrl,
 
         [PSCredential] $Token,
-        [string]$PoolName,
-        [PSCredential] $ServiceCredentials = $null
+        [PSCredential] $ServiceCredentials = $null,
+        [String] $PoolName = "default",
+        [String] $LocalAgentSource = $null
     )
 
     $PlainToken = $Token.GetNetworkCredential().Password
@@ -41,7 +42,8 @@ function Get-TargetResource
             ServerUrl          = $existingConfig.Agent.serverUrl
             Token              = "**********************"
             PoolName           = $existingPoolName
-            ServiceCredentials = $existingConfig.ServiceName
+            ServiceCredentials = $existingConfig.ServiceStartName
+            LocalAgentSource   = ""
         }
     }
     
@@ -53,6 +55,7 @@ function Get-TargetResource
         Token              = ""
         PoolName           = ""
         ServiceCredentials = ""
+        LocalAgentSource   = ""
     }
 }
 
@@ -78,8 +81,9 @@ function Set-TargetResource
         [string]$ServerUrl,
 
         [PSCredential] $Token,
-        [string]$PoolName,
-        [PSCredential] $ServiceCredentials = $null
+        [PSCredential] $ServiceCredentials = $null,
+        [String] $PoolName = "default",
+        [String] $LocalAgentSource = $null
     )
 
     $PlainToken = $Token.GetNetworkCredential().Password
@@ -89,14 +93,14 @@ function Set-TargetResource
     {
         Write-Verbose "Agent is present as requested. Reconfiguring it now."
         Remove-Agent -ServerUrl $ServerUrl -Token $PlainToken -AgentFolder $AgentFolder
-        Set-Agent -ServerUrl $ServerUrl -Token $PlainToken -AgentFolder $AgentFolder -PoolName $PoolName -AgentName $Name -ServiceCredentials $ServiceCredentials
+        Set-Agent -ServerUrl $ServerUrl -Token $PlainToken -AgentFolder $AgentFolder -PoolName $PoolName -AgentName $Name -ServiceCredentials $ServiceCredentials -LocalAgentSource $LocalAgentSource
         return
     }
 
     if ($Ensure -eq "Present" -and -not $existingConfig.Agent) 
     {
         Write-Verbose "Agent was requested to be present, but is not. Configuring it now."
-        Set-Agent -ServerUrl $ServerUrl -Token $PlainToken -AgentFolder $AgentFolder -PoolName $PoolName -AgentName $Name -ServiceCredentials $ServiceCredentials
+        Set-Agent -ServerUrl $ServerUrl -Token $PlainToken -AgentFolder $AgentFolder -PoolName $PoolName -AgentName $Name -ServiceCredentials $ServiceCredentials -LocalAgentSource $LocalAgentSource
         return
     }
 
@@ -138,8 +142,9 @@ function Test-TargetResource
         [string]$ServerUrl,
 
         [PSCredential] $Token,
-        [string]$PoolName,
-        [PSCredential] $ServiceCredentials = $null
+        [PSCredential] $ServiceCredentials = $null,
+        [String] $PoolName = "default",
+        [String] $LocalAgentSource = $null
     )
 
     $PlainToken = $Token.GetNetworkCredential().Password

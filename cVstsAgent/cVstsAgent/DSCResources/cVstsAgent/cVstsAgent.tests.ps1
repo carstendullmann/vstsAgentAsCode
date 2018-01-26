@@ -8,8 +8,7 @@
 #     ...
 # }
 
-$testSettings
-Import-LocalizedData -BaseDirectory $PSScriptRoot -FileName "cVstsAgent.tests.settings.psd1" -BindingVariable testSettings
+Import-LocalizedData -BaseDirectory $PSScriptRoot -FileName "cVstsAgent.tests.settings.psd1" -BindingVariable testSettings | Out-Null
 
 # Tests =============
 

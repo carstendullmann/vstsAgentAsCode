@@ -6,6 +6,7 @@ class cVstsAgent : OMI_BaseResource
   [Required] string AgentFolder;
   [Required] string ServerUrl;
   [write, EmbeddedInstance("MSFT_Credential")] string Token;
-  [write] string PoolName;
   [write, EmbeddedInstance("MSFT_Credential")] string ServiceCredentials;
+  [write] string PoolName;
+  [write] string LocalAgentSource;
 };

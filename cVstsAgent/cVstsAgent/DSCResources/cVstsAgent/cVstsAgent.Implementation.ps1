@@ -76,7 +76,7 @@ function Get-ExistingConfig($AgentFolder, $Token)
     return $existingConfig
 }
 
-function Set-Agent($ServerUrl, $Token, $AgentFolder, $PoolName, $AgentName, $ServiceCredentials)
+function Set-Agent($ServerUrl, $Token, $AgentFolder, $PoolName, $AgentName, $ServiceCredentials, $LocalAgentSource)
 {
     # Replace: If we have same name but it is not our directory
     # Reconfigure: If we have any different (new) setting for existing agent
@@ -86,14 +86,24 @@ function Set-Agent($ServerUrl, $Token, $AgentFolder, $PoolName, $AgentName, $Ser
         New-Item -Path $AgentFolder -ItemType Directory
     }
   
-    $agentZip = $null
+    $agentZipPath = $null
     if (-NOT (Test-Path (Join-Path -Path "$AgentFolder" -ChildPath "config.cmd"))) # did we do the agent download already? 
     {
-        $agentZip = "$AgentFolder\agent.zip"
-        # TODO: Local zip source
-        Invoke-WebRequest -Uri "https://vstsagentpackage.azureedge.net/agent/2.126.0/vsts-agent-win-x64-2.126.0.zip" -OutFile $agentZip
+        $agentZipPath = "$AgentFolder\agent.zip"
+        if ($LocalAgentSource)
+        {
+            Write-Verbose "Getting agent source from $LocalAgentSource."
+            Copy-Item -Path $LocalAgentSource -Destination $agentZipPath
+        }
+        else
+        {
+            $Uri = "https://vstsagentpackage.azureedge.net/agent/2.126.0/vsts-agent-win-x64-2.126.0.zip"
+            Write-Verbose "Getting agent source from $Uri."
+            Invoke-WebRequest -Uri $Uri -OutFile $agentZipPath
+        }
+
         Add-Type -AssemblyName System.IO.Compression.FileSystem
-        [System.IO.Compression.ZipFile]::ExtractToDirectory($agentZip, $AgentFolder)
+        [System.IO.Compression.ZipFile]::ExtractToDirectory($agentZipPath, $AgentFolder)
     }
 
     $CommandArgs = @(
@@ -122,9 +132,9 @@ function Set-Agent($ServerUrl, $Token, $AgentFolder, $PoolName, $AgentName, $Ser
         throw "Configuration failed."    
     }
   
-    if ($agentZip)
+    if ($agentZipPath)
     { 
-        Remove-Item $agentZip
+        Remove-Item $agentZipPath
     }
 }
 
