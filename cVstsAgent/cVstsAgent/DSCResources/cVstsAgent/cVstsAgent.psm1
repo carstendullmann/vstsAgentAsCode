@@ -34,23 +34,23 @@ function Get-TargetResource
     {
         $existingPoolName = if ($existingConfig.PoolFromServer) { $existingConfig.PoolFromServer.Name } else { "[PoolId:$($existingConfig.Agent.poolId)]" }
         return @{
-            Ensure      = "Present"
-            Name        = $existingConfig.Agent.agentName 
-            AgentFolder = $AgentFolder
-            ServerUrl   = $existingConfig.Agent.serverUrl
-            Token       = "**********************"
-            PoolName    = $existingPoolName
-            ServiceCredentials = "**********************"
+            Ensure             = "Present"
+            Name               = $existingConfig.Agent.agentName 
+            AgentFolder        = $AgentFolder
+            ServerUrl          = $existingConfig.Agent.serverUrl
+            Token              = "**********************"
+            PoolName           = $existingPoolName
+            ServiceCredentials = $existingConfig.ServiceName
         }
     }
     
     return @{
-        Ensure      = "Absent"
-        Name        = ""
-        AgentFolder = ""
-        ServerUrl   = ""
-        Token       = ""
-        PoolName    = ""
+        Ensure             = "Absent"
+        Name               = ""
+        AgentFolder        = ""
+        ServerUrl          = ""
+        Token              = ""
+        PoolName           = ""
         ServiceCredentials = ""
     }
 }
@@ -167,6 +167,13 @@ function Test-TargetResource
         if ($Name -ne $existingConfig.Agent.agentName)
         {
             Write-Verbose "Agent name does not match."
+            return $false
+        }
+        
+        $UserName = if ($ServiceCredentials) {$ServiceCredentials.UserName} else {"NT AUTHORITY\NETWORK SERVICE"}
+        if ($UserName -ne $existingConfig.ServiceStartName)
+        {
+            Write-Verbose "Service start name does not match."
             return $false
         }
         

@@ -53,13 +53,26 @@ function Get-ExistingConfig($AgentFolder, $Token)
     # Todo: Find out agent version (if not already in the agent from server config)
     $existingConfig = New-Object PSObject
     $existingConfig | Add-Member -Name "Agent" -MemberType NoteProperty -Value (Get-ExistingConfigPartFromFile -fileName ".agent" -AgentFolder $AgentFolder)
-    $existingConfig | Add-Member -Name "Service" -MemberType NoteProperty -Value (Get-ExistingConfigPartFromFile -fileName ".service" -AgentFolder $AgentFolder)
     if ($existingConfig.Agent)
     {
         $existingConfig | Add-Member -Name "AgentFromServer" -MemberType NoteProperty -Value (Get-AgentFromServer -ServerUrl $existingConfig.Agent.serverUrl -Token $Token -poolId $existingConfig.Agent.poolId -agentId $existingConfig.Agent.agentId )
         $existingConfig | Add-Member -Name "PoolFromServer" -MemberType NoteProperty -Value (Get-PoolFromServer -ServerUrl $existingConfig.Agent.serverUrl -Token $Token -poolId $existingConfig.Agent.poolId)
     }
 
+    $existingConfig | Add-Member -Name "Service" -MemberType NoteProperty -Value (Get-ExistingConfigPartFromFile -fileName ".service" -AgentFolder $AgentFolder)
+    $StartName = ""    
+    if ($existingConfig.Service)
+    {
+        try
+        {
+            $StartName = (Get-WmiObject Win32_Service -Filter "Name='$($existingConfig.Service)'").StartName
+        }
+        catch
+        {
+        }
+    }
+
+    $existingConfig | Add-Member -Name "ServiceStartName" -MemberType NoteProperty -Value $StartName
     return $existingConfig
 }
 
