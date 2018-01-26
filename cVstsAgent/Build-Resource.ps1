@@ -1,4 +1,6 @@
 $Version = "0.1.0.0"
+# For PS 4.0 we need to do it without version:
+$Version = ""
 $OutputFolderPath = "$PSScriptRoot\Output\cVstsAgent\$Version"
 if (Test-Path -Path $OutputFolderPath)
 {

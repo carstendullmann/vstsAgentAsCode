@@ -26,5 +26,5 @@ $Token = New-Object PSCredential ("PAT", (ConvertTo-SecureString $testSettings.P
 $ServiceCreds = New-Object PSCredential($testSettings.Username,(ConvertTo-SecureString $testSettings.Password -Force -AsPlainText))
 SampleConfig -ConfigurationData $ConfigurationData -Token $Token -ServiceCreds $ServiceCreds -OutputPath $PSScriptRoot\SampleConfig
 
-Set-DscLocalConfigurationManager -Path $PSScriptRoot\SampleConfig -Force -Verbose 
+Set-DscLocalConfigurationManager -Path $PSScriptRoot\SampleConfig -Verbose 
 Start-DscConfiguration -Path $PSScriptRoot\SampleConfig -Wait -Verbose -Force

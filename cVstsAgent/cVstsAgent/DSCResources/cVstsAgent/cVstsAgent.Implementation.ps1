@@ -3,7 +3,7 @@ function Get-ExistingConfigPartFromFile($AgentFolder, $fileName)
     $filePath = Join-Path -Path $AgentFolder -ChildPath $fileName
     if (Test-Path $filePath)
     {
-        $content = Get-Content -Path $filePath
+        $content = Get-Content -Path $filePath -Raw
         try
         {
             return $content | ConvertFrom-Json
@@ -118,8 +118,6 @@ function Set-Agent($ServerUrl, $Token, $AgentFolder, $PoolName, $AgentName, $Ser
         "--replace"
     )
 
-    Write-Verbose $WorkFolder
-
     if ($ServiceCredentials)
     {
         $CommandArgs += "--windowsLogonAccount"
@@ -130,14 +128,14 @@ function Set-Agent($ServerUrl, $Token, $AgentFolder, $PoolName, $AgentName, $Ser
 
     & "$AgentFolder\config.cmd" $CommandArgs
 
-    if ($LASTEXITCODE -ne 0)
-    {
-        throw "Configuration failed."    
-    }
-  
     if ($agentZipPath)
     { 
         Remove-Item $agentZipPath
+    }
+
+    if ($LASTEXITCODE -ne 0)
+    {
+        throw "Configuration failed with exit code $LASTEXITCODE. See $AgentFolder\_diag for more information."    
     }
 }
 

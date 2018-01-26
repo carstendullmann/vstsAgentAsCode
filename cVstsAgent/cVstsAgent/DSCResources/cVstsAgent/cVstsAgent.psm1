@@ -41,10 +41,9 @@ function Get-TargetResource
             Name               = $existingConfig.Agent.agentName 
             AgentFolder        = $AgentFolder
             ServerUrl          = $existingConfig.Agent.serverUrl
-            Token              = "**********************"
             PoolName           = $existingPoolName
-            ServiceCredentials = $existingConfig.ServiceStartName
             LocalAgentSource   = ""
+            WorkFolder         = ""
         }
     }
     
@@ -53,10 +52,9 @@ function Get-TargetResource
         Name               = ""
         AgentFolder        = ""
         ServerUrl          = ""
-        Token              = ""
         PoolName           = ""
-        ServiceCredentials = ""
         LocalAgentSource   = ""
+        WorkFolder         = ""
     }
 }
 
@@ -153,6 +151,7 @@ function Test-TargetResource
     $PlainToken = $Token.GetNetworkCredential().Password
 
     $existingConfig = Get-ExistingConfig -AgentFolder $AgentFolder -Token $PlainToken 
+    Write-Verbose "Found existing config $existingConfig"
     $existingPoolName = if ($existingConfig.PoolFromServer) { $existingConfig.PoolFromServer.Name } else { "" }
     
     if ($Ensure -eq "Absent" -and $existingConfig.Agent) 
@@ -178,7 +177,7 @@ function Test-TargetResource
         Write-Verbose "Agent is present as requested."
         if ($Name -ne $existingConfig.Agent.agentName)
         {
-            Write-Verbose "Agent name does not match."
+            Write-Verbose "Requested agent name $Name does not match actual agent name $($existingConfig.Agent.agentName)."
             return $false
         }
         
@@ -201,9 +200,9 @@ function Test-TargetResource
             return $false
         }
         
-        if ($ServerUrl -ne $existingConfig.Agent.serverUrl)
+        if ($ServerUrl.ToLower().Trim("/"," ") -ne $existingConfig.Agent.serverUrl.ToLower().Trim("/"," "))
         {
-            Write-Verbose "ServerUrl does not match."
+            Write-Verbose "Requested ServerUrl $ServerUrl does not match actual ServerUrl $($existingConfig.Agent.serverUrl)."
             return $false
         }
 
