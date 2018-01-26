@@ -22,7 +22,9 @@ $ConfigurationData = @{
     ) 
 }
 
-SampleConfig -ConfigurationData $ConfigurationData -Token $testSettings.PAT -ServiceCreds (New-Object PSCredential($testSettings.Username,(ConvertTo-SecureString $testSettings.Password -Force -AsPlainText))) -OutputPath $PSScriptRoot\SampleConfig
+$Token = New-Object PSCredential ("PAT", (ConvertTo-SecureString $testSettings.PAT -Force -AsPlainText))
+$ServiceCreds = New-Object PSCredential($testSettings.Username,(ConvertTo-SecureString $testSettings.Password -Force -AsPlainText))
+SampleConfig -ConfigurationData $ConfigurationData -Token $Token -ServiceCreds $ServiceCreds -OutputPath $PSScriptRoot\SampleConfig
 
 Set-DscLocalConfigurationManager -Path $PSScriptRoot\SampleConfig -Force -Verbose 
 Start-DscConfiguration -Path $PSScriptRoot\SampleConfig -Wait -Verbose -Force

@@ -4,7 +4,7 @@ Configuration SampleConfig
 {
     param
     (
-        $Token,
+        [pscredential] $Token,
         [PSCredential] $ServiceCreds
     )
 

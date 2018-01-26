@@ -24,12 +24,13 @@ function Get-TargetResource
         [ValidateNotNullOrEmpty()]
         [string]$ServerUrl,
 
-        [string]$Token,
+        [PSCredential] $Token,
         [string]$PoolName,
         [PSCredential] $ServiceCredentials = $null
     )
 
-    $existingConfig = Get-ExistingConfig -AgentFolder $AgentFolder -Token $Token
+    $PlainToken = $Token.GetNetworkCredential().Password
+    $existingConfig = Get-ExistingConfig -AgentFolder $AgentFolder -Token $PlainToken
     if ($existingConfig.Agent) 
     {
         $existingPoolName = if ($existingConfig.PoolFromServer) { $existingConfig.PoolFromServer.Name } else { "[PoolId:$($existingConfig.Agent.poolId)]" }
@@ -76,32 +77,33 @@ function Set-TargetResource
         [ValidateNotNullOrEmpty()]
         [string]$ServerUrl,
 
-        [string]$Token,
+        [PSCredential] $Token,
         [string]$PoolName,
         [PSCredential] $ServiceCredentials = $null
     )
 
-    $existingConfig = Get-ExistingConfig -AgentFolder $AgentFolder -Token $Token
+    $PlainToken = $Token.GetNetworkCredential().Password
+    $existingConfig = Get-ExistingConfig -AgentFolder $AgentFolder -Token $PlainToken
 
     if ($Ensure -eq "Present" -and $existingConfig.Agent) 
     {
         Write-Verbose "Agent is present as requested. Reconfiguring it now."
-        Remove-Agent -ServerUrl $ServerUrl -Token $Token -AgentFolder $AgentFolder
-        Set-Agent -ServerUrl $ServerUrl -Token $Token -AgentFolder $AgentFolder -PoolName $PoolName -AgentName $Name -ServiceCredentials $ServiceCredentials
+        Remove-Agent -ServerUrl $ServerUrl -Token $PlainToken -AgentFolder $AgentFolder
+        Set-Agent -ServerUrl $ServerUrl -Token $PlainToken -AgentFolder $AgentFolder -PoolName $PoolName -AgentName $Name -ServiceCredentials $ServiceCredentials
         return
     }
 
     if ($Ensure -eq "Present" -and -not $existingConfig.Agent) 
     {
         Write-Verbose "Agent was requested to be present, but is not. Configuring it now."
-        Set-Agent -ServerUrl $ServerUrl -Token $Token -AgentFolder $AgentFolder -PoolName $PoolName -AgentName $Name -ServiceCredentials $ServiceCredentials
+        Set-Agent -ServerUrl $ServerUrl -Token $PlainToken -AgentFolder $AgentFolder -PoolName $PoolName -AgentName $Name -ServiceCredentials $ServiceCredentials
         return
     }
 
     if ($Ensure -eq "Absent" -and $existingConfig.Agent) 
     {
         Write-Verbose "Agent was requested to be absent, but is present. Removing it now."
-        Remove-Agent -ServerUrl $ServerUrl -Token $Token -AgentFolder $AgentFolder
+        Remove-Agent -ServerUrl $ServerUrl -Token $PlainToken -AgentFolder $AgentFolder
         return
     }
 
@@ -135,12 +137,14 @@ function Test-TargetResource
         [ValidateNotNullOrEmpty()]
         [string]$ServerUrl,
 
-        [string]$Token,
+        [PSCredential] $Token,
         [string]$PoolName,
         [PSCredential] $ServiceCredentials = $null
     )
 
-    $existingConfig = Get-ExistingConfig -AgentFolder $AgentFolder -Token $Token 
+    $PlainToken = $Token.GetNetworkCredential().Password
+
+    $existingConfig = Get-ExistingConfig -AgentFolder $AgentFolder -Token $PlainToken 
     $existingPoolName = if ($existingConfig.PoolFromServer) { $existingConfig.PoolFromServer.Name } else { "" }
     
     if ($Ensure -eq "Absent" -and $existingConfig.Agent) 
