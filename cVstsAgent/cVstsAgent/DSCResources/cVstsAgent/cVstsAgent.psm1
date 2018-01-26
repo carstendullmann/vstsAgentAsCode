@@ -25,7 +25,8 @@ function Get-TargetResource
         [string]$ServerUrl,
 
         [string]$Token,
-        [string]$PoolName
+        [string]$PoolName,
+        [PSCredential] $ServiceCredentials = $null
     )
 
     $existingConfig = Get-ExistingConfig -AgentFolder $AgentFolder -Token $Token
@@ -39,6 +40,7 @@ function Get-TargetResource
             ServerUrl   = $existingConfig.Agent.serverUrl
             Token       = "**********************"
             PoolName    = $existingPoolName
+            ServiceCredentials = "**********************"
         }
     }
     
@@ -49,6 +51,7 @@ function Get-TargetResource
         ServerUrl   = ""
         Token       = ""
         PoolName    = ""
+        ServiceCredentials = ""
     }
 }
 
@@ -74,7 +77,8 @@ function Set-TargetResource
         [string]$ServerUrl,
 
         [string]$Token,
-        [string]$PoolName
+        [string]$PoolName,
+        [PSCredential] $ServiceCredentials = $null
     )
 
     $existingConfig = Get-ExistingConfig -AgentFolder $AgentFolder -Token $Token
@@ -83,14 +87,14 @@ function Set-TargetResource
     {
         Write-Verbose "Agent is present as requested. Reconfiguring it now."
         Remove-Agent -ServerUrl $ServerUrl -Token $Token -AgentFolder $AgentFolder
-        Set-Agent -ServerUrl $ServerUrl -Token $Token -AgentFolder $AgentFolder -PoolName $PoolName -AgentName $Name
+        Set-Agent -ServerUrl $ServerUrl -Token $Token -AgentFolder $AgentFolder -PoolName $PoolName -AgentName $Name -ServiceCredentials $ServiceCredentials
         return
     }
 
     if ($Ensure -eq "Present" -and -not $existingConfig.Agent) 
     {
         Write-Verbose "Agent was requested to be present, but is not. Configuring it now."
-        Set-Agent -ServerUrl $ServerUrl -Token $Token -AgentFolder $AgentFolder -PoolName $PoolName -AgentName $Name
+        Set-Agent -ServerUrl $ServerUrl -Token $Token -AgentFolder $AgentFolder -PoolName $PoolName -AgentName $Name -ServiceCredentials $ServiceCredentials
         return
     }
 
@@ -132,7 +136,8 @@ function Test-TargetResource
         [string]$ServerUrl,
 
         [string]$Token,
-        [string]$PoolName
+        [string]$PoolName,
+        [PSCredential] $ServiceCredentials = $null
     )
 
     $existingConfig = Get-ExistingConfig -AgentFolder $AgentFolder -Token $Token 

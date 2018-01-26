@@ -3,3 +3,5 @@ cVstsAgent.tests.settings.psd1
 SampleConfig.test.settings.psd1
 Output/
 *.mof
+!*.schema.mof
+*.cer

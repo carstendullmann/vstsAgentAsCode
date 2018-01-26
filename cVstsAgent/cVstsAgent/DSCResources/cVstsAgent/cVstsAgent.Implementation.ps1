@@ -63,7 +63,7 @@ function Get-ExistingConfig($AgentFolder, $Token)
     return $existingConfig
 }
 
-function Set-Agent($ServerUrl, $Token, $AgentFolder, $PoolName, $AgentName)
+function Set-Agent($ServerUrl, $Token, $AgentFolder, $PoolName, $AgentName, $ServiceCredentials)
 {
     # Replace: If we have same name but it is not our directory
     # Reconfigure: If we have any different (new) setting for existing agent
@@ -92,16 +92,26 @@ function Set-Agent($ServerUrl, $Token, $AgentFolder, $PoolName, $AgentName)
         "--agent", $AgentName, 
         "--runAsService",
         "--replace"
-        # TODO: "--windowsLogonAccount myDomain\myUserName --windowsLogonPassword myPassword"
     )
+
+    if ($ServiceCredentials)
+    {
+        $CommandArgs += "--windowsLogonAccount"
+        $CommandArgs += $ServiceCredentials.Username
+        $CommandArgs += "--windowsLogonPassword"
+        $CommandArgs += $ServiceCredentials.GetNetworkCredential().Password
+    }
 
     & "$AgentFolder\config.cmd" $CommandArgs
 
-    # TODO: Check $LASTEXITCODE
+    if ($LASTEXITCODE -ne 0)
+    {
+        throw "Configuration failed."    
+    }
   
     if ($agentZip)
     { 
-        # Remove-Item $agentZip
+        Remove-Item $agentZip
     }
 }
 

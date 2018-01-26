@@ -1,11 +1,28 @@
-$testSettings
-Import-LocalizedData -BaseDirectory $PSScriptRoot -FileName "SampleConfig.test.settings.psd1" -BindingVariable testSettings
+Import-LocalizedData -BaseDirectory $PSScriptRoot -FileName "SampleConfig.test.settings.psd1" -BindingVariable testSettings | Out-Null
+# That .psd1 contains secrets and is not committed to the git repository. Will need to be created individually like this:
+#  @{
+#     PAT = "myPAT"
+#  }
 
 & $PSScriptRoot\Build-Resource.ps1
 & $PSScriptRoot\Install-Resource.ps1
 
 . $PSScriptRoot\SampleConfig.ps1
 
-SampleConfig -Token $testSettings.PAT -OutputPath $PSScriptRoot\SampleConfig
+$ConfigurationData = @{
+    AllNodes = @(    
+        @{ 
+            NodeName = "localhost"
+            CertificateFile = "$PSScriptRoot\DscPublicKey.cer" # Again not committed to the repo. Will need to be created individually like this:
+            # $cert = New-SelfSignedCertificate -Type DocumentEncryptionCertLegacyCsp -DnsName 'DscEncryptionCert' -HashAlgorithm SHA256
+            # $cert | Export-Certificate -FilePath "$env:temp\DscPublicKey.cer" -Force
+            # $cert.Thumbprint # This will be used as the CertificateID
+            # # See https://docs.microsoft.com/en-us/powershell/dsc/secureMOF
+        }
+    ) 
+}
 
+SampleConfig -ConfigurationData $ConfigurationData -Token $testSettings.PAT -ServiceCreds (New-Object PSCredential($testSettings.Username,(ConvertTo-SecureString $testSettings.Password -Force -AsPlainText))) -OutputPath $PSScriptRoot\SampleConfig
+
+Set-DscLocalConfigurationManager -Path $PSScriptRoot\SampleConfig -Force -Verbose 
 Start-DscConfiguration -Path $PSScriptRoot\SampleConfig -Wait -Verbose -Force
